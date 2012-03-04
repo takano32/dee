@@ -31,6 +31,10 @@ struct rom
 	 byte *chr;
 	 int chr_size;
 
+	 byte control_byte1;
+	 byte control_byte2;
+	 
+	 int mapperid;
 	 int mirror_flag;
 	 int sram_enable;
 	 int trainer;

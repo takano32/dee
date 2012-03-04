@@ -4,7 +4,6 @@ struct rom load_rom(char *file)
 {
 	 int fd, err;
 	 byte ines_magic[4] = {'N', 'E', 'S', 0x1A};
-	 byte control_byte1, control_byte2;
 	 struct rom rom;
 	 struct stat sbuf;
 
@@ -39,9 +38,16 @@ struct rom load_rom(char *file)
 
 	 rom.prg_size = rom.header[4] * 1024 * 16;
 	 rom.chr_size = rom.header[5] * 1024 * 8;
-	 control_byte1 = rom.header[6];
-	 control_byte2 = rom.header[7];
-	 
+
+	 /* ROM Control Byte 1 */
+	 rom.control_byte1 = rom.header[6];
+
+	 /* ROM Control Byte 2 */
+	 rom.control_byte2 = rom.header[7];
+
+	 /* ROM Mapper */
+	 rom.mapperid = (rom.header[7] & 0xF0) | ((rom.header[6] & 0xF0) >> 4);
+
 	 if(rom.prg_size > 0)
 		  rom.prg = (byte *)malloc(rom.prg_size);
 
@@ -67,11 +73,10 @@ struct rom load_rom(char *file)
 		  exit(err);
 	 }
 
-	 /* ROM Control Byte 1 */
-	 rom.mirror_flag = (control_byte1 & 1) ? MIRROR_VERTICAL : MIRROR_HORIZONTAL;
-	 rom.sram_enable = (control_byte1 & 2);
-	 rom.trainer = (control_byte1 & 4);
-	 rom.four_screen_mirroring = (control_byte1 & 8);
+	 rom.mirror_flag = (rom.control_byte1 & 1) ? MIRROR_VERTICAL : MIRROR_HORIZONTAL;
+	 rom.sram_enable = (rom.control_byte1 & 2);
+	 rom.trainer = (rom.control_byte1 & 4);
+	 rom.four_screen_mirroring = (rom.control_byte1 & 8);
 	 
 	 close(fd);
 
@@ -79,16 +84,19 @@ struct rom load_rom(char *file)
 	 printf("ROM CHR: %d byte\n", rom.chr_size);
 
 	 char c[8];
-	 byte2binary(control_byte1, c);
-	 printf("ROM FLAGS: %s\n", c);
+	 byte2binary(rom.control_byte1, c);
+	 printf("ROM CONTROL_BYTE1: %s\n", c);
+
+	 byte2binary(rom.control_byte2, c);
+	 printf("ROM CONTROL_BYTE2: %s\n", c);
+
+	 byte2binary(rom.mapperid, c);
+	 printf("ROM MAPPER: %s\n", c);
+
 	 printf("ROM MIRROR FLAG: %d\n", rom.mirror_flag);
 	 printf("ROM SRAM ENABLE: %d\n", rom.sram_enable);
 	 printf("ROM TRAINER: %d\n", rom.trainer);
 	 printf("ROM 4 SCREEN MIRRORING: %d\n", rom.four_screen_mirroring);
-
-	 /* ROM Control Byte 1 */
-	 byte2binary(control_byte2, c);
-	 printf("ROM FLAGS: %s\n", c);
 
 	 return rom;
 }
