@@ -5,7 +5,7 @@ PREFIX=/usr/local/
 
 CC=gcc
 CFLAGS= -Wall -O0 -g `sdl-config --cflags` `freetype-config --cflags` -msse2 -flax-vector-conversions -DPREFIX=\"$(PREFIX)\"
-OBJECTS=rom.o nes.o M6502.o const.o util.o main.o
+OBJECTS=rom.o nes.o mapper.o M6502.o const.o util.o main.o
 
 SYS_LIBS=-lm -ldl
 
@@ -41,6 +41,9 @@ rom.o: Makefile rom.c rom.h
 
 nes.o: Makefile nes.c nes.h
 	$(COBJ) nes.c
+
+mapper.o: Makefile mapper.c mapper.h mappers/mapper0.c mappers/cnrom.c
+	$(COBJ) mapper.c
 
 M6502.o: Makefile M6502.c M6502.h Codes.h Tables.h
 	$(COBJ) M6502.c
